@@ -11,6 +11,7 @@ return [
         'http://localhost:3000',
         'https://mi-frontend.loca.lt',
         'https://red-donkey-35.loca.lt',
+        'https://requests-user-backend-production.onrender.com'
     ],
 
     'allowed_origins_patterns' => [],
