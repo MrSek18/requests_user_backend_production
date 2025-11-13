@@ -10,6 +10,7 @@ return [
         'logout',
         'user'
     ],
+// coment for pushing
 
     'allowed_methods' => ['*'],
 
