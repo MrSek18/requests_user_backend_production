@@ -1,16 +1,7 @@
 <?php
 
 return [
-    'paths' => [
-        'api/*',
-        'sanctum/csrf-cookie',
-        'company_representatives/*',
-        'add_request',
-        'login',
-        'logout',
-        'user'
-    ],
-// coment for pushing
+    'paths' => ['*'], // aplica CORS a todos los endpoints
 
     'allowed_methods' => ['*'],
 
