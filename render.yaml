@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: laravel-backend
+    env: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    envVars:
+      - key: APP_ENV
+        value: local
+      - key: APP_DEBUG
+        value: true
+      - key: APP_KEY
+        value: base64:XtveKjdYZiXEUXJlAUeQ79UyMcxz1/+JHMJBfgXK4gU=
+      - key: APP_URL
+        value: https://laravel-backend.onrender.com
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST
+        value: sql10.freesqldatabase.com
+      - key: DB_PORT
+        value: 3306
+      - key: DB_DATABASE
+        value: sql10806279
+      - key: DB_USERNAME
+        value: sql10806279
+      - key: DB_PASSWORD
+        value: IBBvCgzGCu
+      - key: SANCTUM_STATEFUL_DOMAINS
+        value: requests-admin-frontend-production.vercel.app
+      - key: SESSION_DOMAIN
+        value: requests-admin-frontend-production.vercel.app
