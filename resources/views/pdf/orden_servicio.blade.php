@@ -6,7 +6,6 @@
     <style>
         body { font-family: DejaVu Sans, sans-serif; font-size: 12px; }
         .header { display: flex; justify-content: space-between; }
-        .logo { height: 60px; }
         .table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         .table th, .table td { border: 1px solid #000; padding: 6px; }
         .right { text-align: right; }
@@ -26,10 +25,6 @@
             <p><strong>Dirección:</strong> {{ $direccion_entidad ?? 'N/A' }}</p>
         </div>
         <div>
-            {{-- Logo (comenta si da error) --}}
-            {{--@if(!empty($logo_url))
-                <img class="logo" src="{{ $logo_url }}" alt="Logo">
-            @endif --}}
             <table class="table">
                 <tr><th>Día</th><th>Mes</th><th>Año</th></tr>
                 <tr>
