@@ -27,9 +27,9 @@
         </div>
         <div>
             {{-- Logo (comenta si da error) --}}
-            @if(!empty($logo_url))
+            {{--@if(!empty($logo_url))
                 <img class="logo" src="{{ $logo_url }}" alt="Logo">
-            @endif
+            @endif --}}
             <table class="table">
                 <tr><th>Día</th><th>Mes</th><th>Año</th></tr>
                 <tr>
