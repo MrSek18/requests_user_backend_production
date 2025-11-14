@@ -2,18 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Request as ServiceRequest;
+use App\Models\UserRequest;
 use Illuminate\Support\Carbon;
-use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class ServiceOrderController extends Controller
 {
-    public function download(ServiceRequest $request, Request $http)
+    public function download($id)
     {
-
-        // Carga relaciones necesarias
-        $request->load(['company', 'provider', 'user', 'details.service']);
+        // Buscar la solicitud con todas las relaciones necesarias
+        $request = UserRequest::with([
+            'company',
+            'provider',
+            'representative',
+            'user',
+            'details.service',
+            'details.unit'
+        ])->findOrFail($id);
 
         // Fecha actual formateada
         $now = Carbon::now();
@@ -21,16 +26,16 @@ class ServiceOrderController extends Controller
         $mes = $this->monthNameEs((int)$now->format('m'));
         $anio = $now->format('Y');
 
-        // Armar items para tabla
+        // Armar items para la tabla
         $items = $request->details->map(function ($d) use ($request, $mes, $anio) {
             $descripcion = "Servicio de {$d->service->name} para {$request->company->name}, durante {$mes} de {$anio}.";
-            $condiciones = "Plazo de ejecución del servicio: El plazo de presentación del servicio es de hasta {$d->duration_value} {$d->duration_unit}.\n"
-                . "Conformidad del servicio: La conformidad será otorgada por Secretaría General, adjuntando los documentos correspondientes.\n"
+            $condiciones = "Plazo de ejecución del servicio: hasta {$d->duration} {$d->unit->name}.\n"
+                . "Conformidad del servicio: La conformidad será otorgada por Secretaría General.\n"
                 . "Forma de pago: Según términos de referencia.\n"
                 . "Condiciones del servicio: Según términos de referencia.";
             return [
                 'cantidad'    => $d->quantity,
-                'unidad'      => 'SER',
+                'unidad'      => $d->unit->name,
                 'descripcion' => $descripcion,
                 'condiciones' => $condiciones,
                 'unitario'    => number_format($d->unit_price, 2, '.', ','),
@@ -44,20 +49,20 @@ class ServiceOrderController extends Controller
         $totalGeneral = $items->sum('raw_total');
         $totalTexto = $this->montoEnLetras($totalGeneral) . " SOLES";
 
-        // Datos del encabezado y proveedor
+        // Datos para la vista Blade
         $data = [
             'titulo'           => 'Orden de servicio',
-            'numero'           => $request->id, // request_id
+            'numero'           => $request->id,
             'logo_url'         => $request->company->img_url ?? null,
             'unidad_ejecutora' => $request->company->name,
             'ruc_entidad'      => $request->company->ruc,
-            'direccion_entidad' => $request->company->address,
+            'direccion_entidad'=> $request->company->address,
             'fecha'            => compact('dia', 'mes', 'anio'),
             'proveedor'        => [
-                'name'     => $request->provider->name,
-                'ruc'      => $request->provider->ruc,
-                'address'  => $request->provider->address,
-                'area'     => $request->requesting_area, // área usuaria
+                'name'     => $request->provider->name ?? 'N/A',
+                'ruc'      => $request->provider->ruc ?? 'N/A',
+                'address'  => $request->provider->address ?? 'N/A',
+                'area'     => $request->requesting_area,
             ],
             'items'            => $items,
             'total_general'    => number_format($totalGeneral, 2, '.', ','),
@@ -72,10 +77,13 @@ class ServiceOrderController extends Controller
         return $pdf->download($filename);
     }
 
-    
     private function monthNameEs(int $m): string
     {
-        $map = [1 => 'enero', 2 => 'febrero', 3 => 'marzo', 4 => 'abril', 5 => 'mayo', 6 => 'junio', 7 => 'julio', 8 => 'agosto', 9 => 'septiembre', 10 => 'octubre', 11 => 'noviembre', 12 => 'diciembre'];
+        $map = [
+            1 => 'enero', 2 => 'febrero', 3 => 'marzo', 4 => 'abril', 5 => 'mayo',
+            6 => 'junio', 7 => 'julio', 8 => 'agosto', 9 => 'septiembre',
+            10 => 'octubre', 11 => 'noviembre', 12 => 'diciembre'
+        ];
         return $map[$m] ?? '';
     }
 
@@ -87,10 +95,9 @@ class ServiceOrderController extends Controller
         return strtoupper($this->numeroALetras($enteros)) . " CON " . str_pad((string)$dec, 2, '0', STR_PAD_LEFT) . "/100";
     }
 
-    // Conversión básica (puedes reemplazar por una librería si prefieres)
+    // Conversión básica usando NumberFormatter
     private function numeroALetras(int $num): string
     {
-        // Simplificado: usa una librería si necesitas casos grandes
         $fmt = new \NumberFormatter('es_PE', \NumberFormatter::SPELLOUT);
         return $fmt->format($num);
     }
