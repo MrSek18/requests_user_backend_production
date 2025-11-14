@@ -28,20 +28,23 @@ class ServiceOrderController extends Controller
 
         // Armar items para la tabla
         $items = $request->details->map(function ($d) use ($request, $mes, $anio) {
-            $descripcion = "Servicio de {$d->service->name} para {$request->company->name}, durante {$mes} de {$anio}.";
-            $condiciones = "Plazo de ejecución del servicio: hasta {$d->duration} {$d->unit->name}.\n"
+            $descripcion = "Servicio de " . ($d->service->name ?? 'Servicio') .
+                " para " . ($request->company->name ?? 'Empresa') .
+                ", durante {$mes} de {$anio}.";
+            $condiciones = "Plazo de ejecución del servicio: hasta " . ($d->duration ?? '0') .
+                " " . ($d->unit->name ?? 'unidad') . ".\n"
                 . "Conformidad del servicio: La conformidad será otorgada por Secretaría General.\n"
                 . "Forma de pago: Según términos de referencia.\n"
                 . "Condiciones del servicio: Según términos de referencia.";
             return [
-                'cantidad'    => $d->quantity,
-                'unidad'      => $d->unit->name,
+                'cantidad'    => $d->quantity ?? 0,
+                'unidad'      => $d->unit->name ?? 'N/A',
                 'descripcion' => $descripcion,
                 'condiciones' => $condiciones,
-                'unitario'    => number_format($d->unit_price, 2, '.', ','),
-                'total'       => number_format($d->subtotal, 2, '.', ','),
-                'raw_unit'    => (float)$d->unit_price,
-                'raw_total'   => (float)$d->subtotal,
+                'unitario'    => number_format($d->unit_price ?? 0, 2, '.', ','),
+                'total'       => number_format($d->subtotal ?? 0, 2, '.', ','),
+                'raw_unit'    => (float)($d->unit_price ?? 0),
+                'raw_total'   => (float)($d->subtotal ?? 0),
             ];
         });
 
@@ -54,15 +57,15 @@ class ServiceOrderController extends Controller
             'titulo'           => 'Orden de servicio',
             'numero'           => $request->id,
             'logo_url'         => $request->company->img_url ?? null,
-            'unidad_ejecutora' => $request->company->name,
-            'ruc_entidad'      => $request->company->ruc,
-            'direccion_entidad'=> $request->company->address,
+            'unidad_ejecutora' => $request->company->name ?? 'N/A',
+            'ruc_entidad'      => $request->company->ruc ?? 'N/A',
+            'direccion_entidad'=> $request->company->address ?? 'N/A',
             'fecha'            => compact('dia', 'mes', 'anio'),
             'proveedor'        => [
                 'name'     => $request->provider->name ?? 'N/A',
                 'ruc'      => $request->provider->ruc ?? 'N/A',
                 'address'  => $request->provider->address ?? 'N/A',
-                'area'     => $request->requesting_area,
+                'area'     => $request->requesting_area ?? 'N/A',
             ],
             'items'            => $items,
             'total_general'    => number_format($totalGeneral, 2, '.', ','),
