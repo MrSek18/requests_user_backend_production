@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
@@ -58,14 +59,21 @@ class AuthController extends Controller
             'password.required' => 'La contraseña es obligatoria'
         ]);
 
-        // Intentar login
+        // Intentar login con Auth
         if (!Auth::attempt($credentials)) {
             return response()->json([
                 'message' => 'Credenciales inválidas'
             ], 401);
         }
 
-        $user = User::where('email', $request->email)->firstOrFail();
+        try {
+            // Buscar al usuario
+            $user = User::where('email', $request->email)->firstOrFail();
+        } catch (\Illuminate\Database\QueryException $ex) {
+            // Reconectar si la conexión se cayó
+            DB::reconnect('mysql');
+            $user = User::where('email', $request->email)->firstOrFail();
+        }
 
         // Elimina tokens existentes para evitar múltiples sesiones
         $user->tokens()->delete();
