@@ -14,10 +14,29 @@ use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\RequestController;
 use App\Http\Controllers\ServiceOrderController;
+
+use Illuminate\Support\Facades\DB;
+
+
 // Ruta pública de prueba
 Route::get('/test', function () {
     return response()->json(['message' => 'API funcionando']);
 });
+
+
+// health-check
+Route::get('/health', function () {
+    try {
+        DB::select('SELECT 1'); // Warm-up query
+        return response()->json(['status' => 'ok']);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ], 500);
+    }
+});
+
 
 // Autenticación
 Route::post('/login', [AuthController::class, 'login']);
