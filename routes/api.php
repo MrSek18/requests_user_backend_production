@@ -31,7 +31,7 @@ Route::get('/health', function () {
         DB::select('SELECT 1'); // Warm-up query
         return response()->json(['status' => 'ok']);
     } catch (\Exception $e) {
-        Log::warning("Health-check falló: ".$e->getMessage()); 
+        Log::warning("Health-check falló: " . $e->getMessage());
         return response()->json(['status' => 'warming'], 503);
     }
 });
@@ -73,7 +73,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/company_representatives/{company_id}', [RepresentativeController::class, 'byCompany']);
 
     Route::post('/add_request', [RequestController::class, 'store']);
-    Route::put('/user/{id}', [UserController::class, 'update']); // 🔁 Mover aquí también
+    Route::put('/user/{id}', [UserController::class, 'update']); 
     Route::get('/requests/{request}/orden-servicio/pdf', [ServiceOrderController::class, 'download']);
     Route::get('/requests/recent', [RequestController::class, 'recent']);
 });

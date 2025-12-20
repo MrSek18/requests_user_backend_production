@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -12,7 +13,7 @@ class UserController extends Controller
     {
         // Obtener el usuario autenticado con verificación explícita
         $user = Auth::user();
-        
+
         // Verificar autenticación primero
         if (!$user) {
             return response()->json([
@@ -33,7 +34,7 @@ class UserController extends Controller
         // Validación de datos
         $validatedData = $request->validate([
             'name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|unique:users,email,'.$user->id,
+            'email' => 'sometimes|email|unique:users,email,' . $user->id,
             'password' => 'sometimes|string|min:8',
             'dni' => 'sometimes|string|max:20',
             'celular' => 'sometimes|string|max:20'
@@ -41,6 +42,12 @@ class UserController extends Controller
 
         // Actualización segura
         try {
+
+            if ($request->filled('password')) {
+                $user->password = Hash::make($request->password);
+                unset($validatedData['password']);
+            }
+
             $user->fill($validatedData);
             $user->save();
 
@@ -48,7 +55,6 @@ class UserController extends Controller
                 'message' => 'Datos actualizados correctamente',
                 'user' => $user->fresh()
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Error al actualizar',
