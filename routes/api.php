@@ -16,6 +16,7 @@ use App\Http\Controllers\RequestController;
 use App\Http\Controllers\ServiceOrderController;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 
 // Ruta pública de prueba
@@ -30,10 +31,8 @@ Route::get('/health', function () {
         DB::select('SELECT 1'); // Warm-up query
         return response()->json(['status' => 'ok']);
     } catch (\Exception $e) {
-        return response()->json([
-            'status' => 'error',
-            'message' => $e->getMessage()
-        ], 500);
+        Log::warning("Health-check falló: ".$e->getMessage()); 
+        return response()->json(['status' => 'warming'], 503);
     }
 });
 
